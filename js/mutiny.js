@@ -73,26 +73,27 @@
       }
       const data = await res.json();
       if (res.status === 429) {
-        showMutinyToast(data.message);
-        setMutinyCooldown(data.remaining || 300);
         mutinyPanel.classList.remove('open');
+        setMutinyCooldown(data.remaining || 300);
         return;
       }
       if (data.action === 'skipped') {
-        showMutinyToast(data.message);
         mutinyPanel.classList.remove('open');
-        setMutinyCooldown(300);
+        mutinyToggle.innerHTML = '&#x2620; SKIPPED!';
+        setTimeout(() => setMutinyCooldown(300), 2000);
       } else if (data.action === 'voted') {
+        mutinyPanel.classList.remove('open');
         mutinyToggle.classList.add('voted');
+        mutinyToggle.innerHTML = '&#x2620; VOTED ' + data.votes + '/' + data.needed;
         mutinyStatus.textContent = data.votes + '/' + data.needed + ' VOTES';
         mutinyDesc.textContent = data.message;
         mutinyFire.innerHTML = '&#x2620; VOTED';
-        showMutinyToast(data.message, 5000);
       }
     } catch (e) {
       mutinyCooldown = false;
       mutinyFire.disabled = false;
-      showMutinyToast('Mutiny failed. Radio resists.');
+      mutinyToggle.innerHTML = '&#x2620; FAILED';
+      setTimeout(() => { mutinyToggle.innerHTML = '&#x2620; MUTINY'; }, 3000);
       mutinyFire.innerHTML = '&#x2620; WALK THE PLANK';
     }
   });
