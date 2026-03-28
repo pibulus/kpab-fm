@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>KPAB.FM — Pirate Radio</title>
+  <meta name="description" content="KPAB.FM — Pirate radio broadcasting from Brunswick. Listen live, request songs from 10,000+ tracks.">
+  <meta name="theme-color" content="#050505">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KPAB.FM">
+  <meta property="og:title" content="KPAB.FM — Pirate Radio">
+  <meta property="og:description" content="Live pirate radio from Brunswick. Listen & request songs.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kpab.fm/">
+  <meta property="og:image" content="https://kpab.fm/icon-512.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="station-name">KPAB.FM</div>
+      <div class="station-subtitle">Broadcasting from Brunswick</div>
+      <div class="status-bar">
+        <span class="status-dot"></span>
+        <span>LIVE TRANSMISSION</span>
+        <span>&middot;</span>
+        <span>PIRATE SIGNAL ACTIVE</span>
+      </div>
+    </header>
+
+    <div class="player-chassis" id="playerChassis">
+    <section class="now-playing" id="nowPlaying" aria-label="Now playing">
+      <div class="art-wrapper">
+        <img class="album-art" id="albumArt" src="" alt="Album art" style="display:none">
+        <div class="art-placeholder" id="artPlaceholder">&#x1F4FB;</div>
+      </div>
+      <div class="track-info">
+        <div class="signal-lost" id="signalLost">&#x26A1; SIGNAL LOST &#x26A1;</div>
+        <div class="track-artist" id="trackArtist">LOADING...</div>
+        <div class="track-title" id="trackTitle">Tuning in...</div>
+        <div class="track-meta" id="trackAlbum"></div>
+        <div class="genre-tag" id="genreTag" style="display:none"></div>
+      </div>
+    </section>
+
+    <section class="progress-section" id="progressSection" aria-label="Track progress">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-times">
+        <span class="elapsed" id="timeElapsed">--:--</span>
+        <span id="timeDuration">--:--</span>
+      </div>
+    </section>
+
+    <section class="player-controls" aria-label="Player controls">
+      <button class="play-btn" id="playBtn" aria-label="Play stream" title="Play / Pause">&#x25B6;</button>
+      <div class="visualizer" id="visualizer" aria-hidden="true"></div>
+      <div class="vol-wrapper">
+        <span class="vol-icon" id="volIcon">&#x1F50A;</span>
+        <input type="range" id="volSlider" min="0" max="1" step="0.02" value="0.8" aria-label="Volume">
+      </div>
+      <div class="listeners-badge">&#x1F465; <span class="listeners-count" id="listenerCount">&mdash;</span> listening</div>
+    </section>
+    </div>
+
+
+    <div class="mutiny-toast" id="mutinyToast"></div>
+    <section class="request-section" id="requestSection">
+      <button class="request-toggle" id="requestToggle" aria-label="Request a song">&#x1F4FB; Request a Song</button>
+      <div class="request-panel" id="requestPanel" aria-label="Song request">
+        <div class="request-header">
+          <span class="request-title">REQUEST A TRACK</span>
+          <button class="request-close" id="requestClose" aria-label="Close">&times;</button>
+        </div>
+        <div class="request-search-wrap">
+          <input type="text" class="request-search" id="requestSearch" placeholder="Search artist, title, album..." autocomplete="off" spellcheck="false">
+          <span class="search-icon">&#x2315;</span>
+          <span class="search-count" id="searchCount"></span>
+        </div>
+        <div class="request-results" id="requestResults">
+          <div class="request-empty" id="requestEmpty">
+            <span class="empty-icon">&#x1F3B5;</span>
+            <span>Search 10,000+ requestable tracks</span>
+          </div>
+        </div>
+        <div class="request-toast" id="requestToast" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="history-section" aria-label="Song history">
+      <div class="section-header">Recently Played</div>
+      <div class="history-list" id="historyList">
+        <div class="history-item">
+          <div class="history-art-placeholder">&#x266A;</div>
+          <div class="history-text">Loading history...</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mutiny-section" id="mutinySection">
+      <button class="mutiny-toggle" id="mutinyToggle" title="Skip this track">&#x2620; MUTINY</button>
+      <div class="mutiny-panel" id="mutinyPanel">
+        <div class="mutiny-info">
+          <div class="vote-status" id="mutinyStatus">READY</div>
+          <div id="mutinyDesc">Don't like what's playing? Call a mutiny. Solo listener = instant skip. Multiple listeners = majority vote.</div>
+          <button class="mutiny-fire" id="mutinyFire">&#x2620; WALK THE PLANK</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-section">
+      <button class="about-toggle" id="aboutToggle">&#x2139; About / FAQ</button>
+      <div class="about-panel" id="aboutPanel">
+        <div class="about-content">
+          <div class="about-blurb">
+	    The algorithms are corrupted. Embrace uncertainty.
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">WHAT IS THIS?</div>
+            <div class="faq-a">A pirate radio station running on a Raspberry Pi 5 in a house in Brunswick, Melbourne. 24/7 music with a taste level but no format. No ads. No tracking. No subscriptions. Just a hard drive doing its best.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">WHAT KIND OF MUSIC?</div>
+            <div class="faq-a">All of it. Punk, jazz, salsa, metal, ambient, hip-hop, Afrobeat, hyperpop, country, dub, soul, whatever. The curation guarantees a floor &mdash; nothing evil, nothing obvious &mdash; but within that, anything can happen. The fun is in not knowing what's next.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">WHY DOES THIS EXIST?</div>
+            <div class="faq-a">Because Spotify's algorithms are a con. Because radio compartmentalises people into taste categories. Because every dollar or minute taken away from platforms that exploit musicians is worth it. We're bigger than genre. It's time to build our own platforms and think local digitally.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">HOW SHOULD I LISTEN?</div>
+            <div class="faq-a">Hit play and let it ride. Not recognising half the songs is a feature, not a bug &mdash; jumping from Enya to Pantera <em>is</em> the point. Give it half an hour, it starts to make sense. You can search and request from the full catalog, no account needed. If something catches you, stay with it. If it doesn't, something better is 3 minutes away. Want a radio show? Hit me up.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">D.I.T &mdash; DO IT TOGETHER</div>
+            <div class="faq-a">This station belongs to everyone who listens. <a href="https://quickcat.club/drop/" target="_blank" rel="noopener" style="color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,255,234,0.3);">Drop a record</a> into the library and it goes straight into rotation. Vote to skip tracks that don't hit right &mdash; the station learns from what stays and what walks the plank. No gatekeepers, no curators with a clipboard. Just people shaping a sound together. The more ears on it, the better it gets.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">WHAT'S COMING?</div>
+            <div class="faq-a">Track voting that shapes rotation. Station IDs. Wacky podcasts. Experimental hours. More music. Whatever! &mdash; it's pirate radio. The frequency must grow.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">WILL IT GO DOWN?</div>
+            <div class="faq-a">Almost certainly. It's an $80 raspberry pi strapped to a hard drive on a desk in my house. It crashes when I look at it funny. But it always comes back. Uptime is a corporate metric. We measure in vibes.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">WHO MADE THIS?</div>
+            <div class="faq-a">Pablo. Medium sized Mexican-Australian in Brunswick, Melbourne. Card carrying Subgenius. Plays in <a href="https://mesacosa.bandcamp.com/album/el-es-demons" target="_blank" rel="noopener" style="color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,255,234,0.3);">Mesa Cosa</a>, runs <a href="https://bonesouprules.com" target="_blank" rel="noopener" style="color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,255,234,0.3);">Bone Soup</a> touring, codes at <a href="https://github.com/pibulus" target="_blank" rel="noopener" style="color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,255,234,0.3);">GitHub</a>. Part of the <a href="https://quickcat.club" target="_blank" rel="noopener" style="color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,255,234,0.3);">Quick Cat Club</a>. Pro choice, pro Palestine, pro wrestling.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="msg-section" id="msgSection">
+      <button class="msg-toggle" id="msgToggle">
+        <span class="msg-toggle-text">&#x1F4EC; DROP A MESSAGE</span>
+      </button>
+      <div class="msg-form-wrap" id="msgFormWrap">
+        <div class="msg-form" id="msgForm">
+          <input type="text" id="msgName" placeholder="Name (optional)" maxlength="50">
+          <textarea id="msgText" placeholder="Say something..." maxlength="500" rows="3"></textarea>
+          <div class="msg-form-actions">
+            <span class="msg-status" id="msgStatus"></span>
+            <button class="msg-send" id="msgSend">SEND</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <a href="https://github.com/pibulus" target="_blank" rel="noopener" class="footer-link">pibulus</a> &middot; Pi 5 Node &middot; Software is Politics &amp; Free Palestine
+    </footer>
+  </div>
+
+  <audio id="audioEl" preload="none" aria-hidden="true"></audio>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/player.js"></script>
+  <script src="/js/request.js"></script>
+  <script src="/js/mutiny.js"></script>
+  <script src="/js/about.js"></script>
+  <script src="/js/messages.js"></script>
+  <script src="/js/share.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
