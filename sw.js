@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kpab-v4';
+const CACHE_NAME = 'kpab-v5';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -41,8 +41,10 @@ self.addEventListener('fetch', (e) => {
       url.pathname.endsWith('.css')) {
     e.respondWith(
       fetch(e.request).then(res => {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        }
         return res;
       }).catch(() => caches.match(e.request).then(cached => cached || caches.match('/offline.html')))
     );

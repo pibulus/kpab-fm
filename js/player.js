@@ -7,6 +7,7 @@
   let progressTimer = null;
   let lastHistoryKey = '';
   let pollFailCount = 0;
+  let lastTickWall = 0;
   const pollChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('kpab-poll') : null;
 
   const audioEl        = document.getElementById('audioEl');
@@ -40,9 +41,13 @@
 
   function startProgressTick() {
     clearInterval(progressTimer);
+    lastTickWall = Date.now();
     progressTimer = setInterval(() => {
       if (trackDuration > 0) {
-        trackElapsed = Math.min(trackElapsed + 1, trackDuration);
+        const now = Date.now();
+        const delta = Math.round((now - lastTickWall) / 1000);
+        lastTickWall = now;
+        trackElapsed = Math.min(trackElapsed + delta, trackDuration);
         const pct = trackElapsed / trackDuration;
         progressFill.style.transform = 'scaleX(' + pct + ')';
         timeElapsed.textContent = fmtTime(trackElapsed);

@@ -74,7 +74,7 @@
       const data = await res.json();
       if (res.status === 429) {
         showMutinyToast(data.message);
-        setMutinyCooldown(data.remaining);
+        setMutinyCooldown(data.remaining || 300);
         mutinyPanel.classList.remove('open');
         return;
       }
