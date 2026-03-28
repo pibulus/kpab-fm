@@ -54,6 +54,13 @@
     }
   });
 
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mutinyPanel.classList.contains('open')) {
+      mutinyPanel.classList.remove('open');
+      if (!mutinyCooldown) mutinyToggle.innerHTML = '&#x2620; MUTINY';
+    }
+  });
+
   mutinyFire.addEventListener('click', async () => {
     if (mutinyCooldown) return;
     mutinyCooldown = true;

@@ -7,6 +7,7 @@
   let progressTimer = null;
   let lastHistoryKey = '';
   let pollFailCount = 0;
+  const pollChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('kpab-poll') : null;
 
   const audioEl        = document.getElementById('audioEl');
   const playBtn        = document.getElementById('playBtn');
@@ -42,8 +43,8 @@
     progressTimer = setInterval(() => {
       if (trackDuration > 0) {
         trackElapsed = Math.min(trackElapsed + 1, trackDuration);
-        const pct = (trackElapsed / trackDuration) * 100;
-        progressFill.style.width = pct + '%';
+        const pct = trackElapsed / trackDuration;
+        progressFill.style.transform = 'scaleX(' + pct + ')';
         timeElapsed.textContent = fmtTime(trackElapsed);
       }
     }, 1000);
@@ -67,7 +68,7 @@
     timeElapsed.textContent = fmtTime(trackElapsed);
     timeDuration.textContent = fmtTime(trackDuration);
     if (trackDuration > 0) {
-      progressFill.style.width = ((trackElapsed / trackDuration) * 100) + '%';
+      progressFill.style.transform = 'scaleX(' + (trackElapsed / trackDuration) + ')';
     }
 
     const songId = song.id || song.title;
@@ -76,11 +77,11 @@
       lastSongId = songId;
 
       progressFill.style.transition = 'none';
-      progressFill.style.width = '0%';
+      progressFill.style.transform = 'scaleX(0)';
       requestAnimationFrame(() => {
-        progressFill.style.transition = 'width 1s linear';
+        progressFill.style.transition = 'transform 1s linear';
         if (trackDuration > 0) {
-          progressFill.style.width = ((trackElapsed / trackDuration) * 100) + '%';
+          progressFill.style.transform = 'scaleX(' + (trackElapsed / trackDuration) + ')';
         }
       });
 
@@ -230,7 +231,7 @@
     listenerCount.textContent = '\u2014';
     timeElapsed.textContent = '--:--';
     timeDuration.textContent = '--:--';
-    progressFill.style.width = '0%';
+    progressFill.style.transform = 'scaleX(0)';
   }
 
   async function poll() {
@@ -240,11 +241,19 @@
       const data = await res.json();
       pollFailCount = 0;
       updateNowPlaying(data);
+      if (pollChannel) pollChannel.postMessage(data);
     } catch (err) {
       console.warn('[' + STATION.name + '] Poll failed:', err.message);
       pollFailCount++;
       showSignalLost();
     }
+  }
+
+  if (pollChannel) {
+    pollChannel.onmessage = (e) => {
+      pollFailCount = 0;
+      updateNowPlaying(e.data);
+    };
   }
 
   function startPolling() {

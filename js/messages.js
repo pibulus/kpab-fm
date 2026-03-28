@@ -15,6 +15,13 @@
     if (!isOpen) setTimeout(() => msgText.focus(), 400);
   });
 
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && msgSection.classList.contains('open')) {
+      msgSection.classList.remove('open');
+      msgToggle.innerHTML = '<span class="msg-toggle-text">&#x1F4EC; DROP A MESSAGE</span>';
+    }
+  });
+
   msgSend.addEventListener('click', async () => {
     const text = msgText.value.trim();
     if (!text) return;
