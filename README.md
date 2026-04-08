@@ -115,11 +115,15 @@ All JS modules are IIFE-wrapped — no globals leak except `STATION` (config) an
 
 ## Deployment
 
-The included `deploy.sh` is configured for KPAB's Pi server. To use it for your setup:
+The included `deploy.sh` is configured for KPAB's Pi server. The canonical production path is `/home/pibulus/pibulus-os/www/html/kpab`.
+
+To use it for your setup:
 
 1. Set `PI_HOST` env var to your `user@host`
 2. Update the `DEST` path in the script to your web root
 3. Ensure SSH key auth is configured (no passwords in the script)
+
+Legacy note: an older passport-drive path existed during Pi migration work. Do not use it as a second live copy. Keep one live path and use git or timestamped backups for rollback.
 
 Or just copy the files to any static host. No build step required.
 

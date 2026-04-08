@@ -18,7 +18,6 @@
     mutinyCooldown = true;
     if (cooldownTick) clearInterval(cooldownTick);
     mutinyToggle.classList.add('cooldown');
-    mutinyToggle.classList.remove('voted');
     mutinyFire.disabled = true;
     mutinyFire.style.opacity = '0.3';
     mutinyFire.style.cursor = 'not-allowed';
@@ -38,7 +37,7 @@
         mutinyFire.style.cursor = 'pointer';
         mutinyFire.innerHTML = '&#x2620; WALK THE PLANK';
         mutinyStatus.textContent = 'READY';
-        mutinyDesc.textContent = "Don't like what's playing? Call a mutiny.";
+        mutinyDesc.textContent = "Don't like what's playing? Skip it. One skip every 10 minutes.";
         return;
       }
       const display = left > 60 ? Math.ceil(left/60) + 'm' : left + 's';
@@ -63,38 +62,30 @@
 
   mutinyFire.addEventListener('click', async () => {
     if (mutinyCooldown) return;
-    mutinyCooldown = true;
     mutinyFire.disabled = true;
     mutinyFire.textContent = '...';
     try {
       const res = await fetch(STATION.mutinyEndpoint, { method: 'POST' });
-      if (!res.ok && res.status !== 429) {
-        throw new Error('HTTP ' + res.status);
-      }
       const data = await res.json();
       if (res.status === 429) {
         mutinyPanel.classList.remove('open');
-        setMutinyCooldown(data.remaining || 300);
+        setMutinyCooldown(data.remaining || 600);
         return;
       }
       if (data.action === 'skipped') {
         mutinyPanel.classList.remove('open');
         mutinyToggle.innerHTML = '&#x2620; SKIPPED!';
-        setTimeout(() => setMutinyCooldown(300), 2000);
-      } else if (data.action === 'voted') {
-        mutinyPanel.classList.remove('open');
-        mutinyToggle.classList.add('voted');
-        mutinyToggle.innerHTML = '&#x2620; VOTED ' + data.votes + '/' + data.needed;
-        mutinyStatus.textContent = data.votes + '/' + data.needed + ' VOTES';
-        mutinyDesc.textContent = data.message;
-        mutinyFire.innerHTML = '&#x2620; VOTED';
+        showMutinyToast('Track walked the plank.');
+        setTimeout(() => setMutinyCooldown(data.remaining || 600), 1500);
+      } else {
+        showMutinyToast(data.message || 'Mutiny failed. Radio resists.');
+        mutinyFire.innerHTML = '&#x2620; WALK THE PLANK';
+        mutinyFire.disabled = false;
       }
     } catch (e) {
-      mutinyCooldown = false;
-      mutinyFire.disabled = false;
-      mutinyToggle.innerHTML = '&#x2620; FAILED';
-      setTimeout(() => { mutinyToggle.innerHTML = '&#x2620; MUTINY'; }, 3000);
+      showMutinyToast('Mutiny failed. Radio resists.');
       mutinyFire.innerHTML = '&#x2620; WALK THE PLANK';
+      mutinyFire.disabled = false;
     }
   });
 })();

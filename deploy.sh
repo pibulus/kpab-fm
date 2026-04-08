@@ -4,9 +4,10 @@
 #
 # Requires: SSH key auth or sshpass configured externally
 # Set PI_HOST to override the default target
+# Canonical production path lives inside pibulus-os.
 
 PI="${PI_HOST:-pibulus@pibulus.local}"
-DEST="/media/pibulus/passport/www/html/kpab"
+DEST="/home/pibulus/pibulus-os/www/html/kpab"
 
 echo "Deploying to $PI:$DEST..."
 
