@@ -407,6 +407,14 @@
       animation: vizPulse var(--dur, 0.6s) ease-in-out infinite alternate;
     }
 
+    /* live mode: bars driven by the actual stream via AnalyserNode */
+    .visualizer.live .viz-bar {
+      animation: none;
+      opacity: 0.85;
+      transform-origin: bottom;
+      transition: opacity 200ms ease;
+    }
+
     @keyframes vizIdle {
       from { transform: scaleY(0.08); opacity: 0.1; }
       to   { transform: scaleY(0.25); opacity: 0.2; }
@@ -2680,6 +2688,99 @@
     });
     // Stronger haptic on play button
     playBtn.addEventListener('touchstart', () => haptic(15), { passive: true });
+  </script>
+
+  <script>
+    /* ── 🎚️ LIVE VIZ — the 18 bars hear the actual stream ──
+       Additive layer: hooks the existing #audioEl / #visualizer by id and
+       only takes over (`.live` class) when real frequency data flows.
+       Falls back to the CSS pulse if the stream host won't share data. */
+    (function () {
+      const audioEl = document.getElementById('audioEl');
+      const visualizer = document.getElementById('visualizer');
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!audioEl || !visualizer || !AC) return;
+
+      let ctx = null, analyser = null, data = null, rafId = null;
+      let silentSince = 0, corsFallback = false;
+
+      // Ask for CORS-readable stream data up front (before any src is set).
+      audioEl.crossOrigin = 'anonymous';
+
+      // If the stream host doesn't send CORS headers, playback errors here —
+      // retry once opaque (audio works, CSS pulse keeps the vibe).
+      audioEl.addEventListener('error', () => {
+        if (corsFallback || !audioEl.crossOrigin || ctx) return;
+        corsFallback = true;
+        audioEl.removeAttribute('crossorigin');
+        if (audioEl.getAttribute('src')) {
+          audioEl.src = audioEl.getAttribute('src');
+          audioEl.play().catch(() => {});
+        }
+      });
+
+      function ensureGraph() {
+        if (ctx) return true;
+        try {
+          ctx = new AC();
+          const src = ctx.createMediaElementSource(audioEl);
+          analyser = ctx.createAnalyser();
+          analyser.fftSize = 64; // 32 bins — plenty for 18 bars
+          analyser.smoothingTimeConstant = 0.75;
+          src.connect(analyser);
+          analyser.connect(ctx.destination);
+          data = new Uint8Array(analyser.frequencyBinCount);
+          return true;
+        } catch (e) { ctx = null; return false; }
+      }
+
+      function frame(now) {
+        rafId = requestAnimationFrame(frame);
+        analyser.getByteFrequencyData(data);
+        const bars = visualizer.children;
+        const n = bars.length;
+        let sum = 0;
+        for (let i = 0; i < n; i++) {
+          // ease the spread toward low-mid bins where the music lives
+          const bin = Math.min(data.length - 1,
+            1 + Math.floor(Math.pow(i / n, 1.4) * (data.length * 0.8)));
+          const v = data[bin] / 255;
+          sum += v;
+          bars[i].style.transform = 'scaleY(' + Math.max(0.08, v).toFixed(3) + ')';
+        }
+        if (sum === 0) {
+          if (!silentSince) silentSince = now;
+          if (now - silentSince > 3000) stopLive(); // opaque data — CSS pulse takes it
+        } else {
+          silentSince = 0;
+          visualizer.classList.add('live');
+        }
+      }
+
+      function startLive() {
+        if (corsFallback || rafId) return;
+        if (!ensureGraph()) return;
+        if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+        silentSince = 0;
+        rafId = requestAnimationFrame(frame);
+      }
+
+      function stopLive() {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+        visualizer.classList.remove('live');
+        for (const b of visualizer.children) b.style.transform = '';
+      }
+
+      audioEl.addEventListener('playing', startLive);
+      audioEl.addEventListener('pause', stopLive);
+      audioEl.addEventListener('ended', stopLive);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        } else if (!audioEl.paused) startLive();
+      });
+    })();
   </script>
 
 </body>
