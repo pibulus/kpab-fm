@@ -1,0 +1,32 @@
+# Launch hints for Launch Arsenal.
+# Edit aggressively. These fields should pin the app's real audience, problem, and promise.
+name: KPAB.FM
+slug: kpab-fm
+app_type: chrome-extension
+audience: people who live in the browser and want less friction
+problem: 'the existing way still feels heavier, foggier, or slower than it should'
+promise: KPAB.FM — Forkable Pirate Radio Player
+cta: Reply if you want the link.
+differentiators: []
+proof_points:
+  - >-
+    streamUrl : AzuraCast Admin Station Mount Points. The default is usually
+    /radio.mp3
+  - >-
+    catalogUrl : This is a custom JSON file you generate (see below), not a
+    built-in AzuraCast endpoint
+  - Export from AzuraCast's media manager and transform with a script
+  - Query AzuraCast's API station media endpoints
+objections:
+  - 'Still wants a human pass on audience, proof, and the sharpest angle.'
+keywords:
+  seed:
+    - KPAB.FM
+    - kpab fm
+    - chrome extension
+  audience: people who live in the browser and want less friction
+  intent:
+    - launch faster
+    - clearer first draft
+manual_notes:
+  - Edit this aggressively. Keep only the lines that feel native to the app.
